@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'edu.wpi.first.GradleRIO' version '2020.1.2'
+    id 'edu.wpi.first.GradleRIO' version '2021.2.2'
 }
 
 def ROBOT_MAIN_CLASS = "com.swervedrivespecialties.exampleswerve.Main"
@@ -9,7 +9,7 @@ sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
-    mavenCentral()
+    maven { url 'https://nexus.otake.pw/repository/maven-public/' }
 
     // CTRE maven repository for Phoenix library (Talon SRX drivers, Victor SPX, etc.)
     maven {
@@ -28,7 +28,7 @@ repositories {
         url = "https://jitpack.io"
     }
 
-    String frcYear = '2020'
+    String frcYear = '2021'
     File frcHome
     if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
         String publicFolder = System.getenv('PUBLIC')
@@ -52,14 +52,22 @@ repositories {
 deploy {
     targets {
         roboRIO('roborio') {
-            team = frc.getTeamOrDefault(2910)
+            team = frc.getTeamOrDefault(1481)
         }
     }
     artifacts {
         frcJavaArtifact('frcJava') {
-            targets << 'roborio'
-
+            targets << "roborio"
+            // Debug can be overridden by command line, for use with VSCode
             debug = frc.getDebugOrDefault(false)
+        }
+        // Built in artifact to deploy arbitrary files to the roboRIO.
+        fileTreeArtifact('frcStaticFileDeploy') {
+            // The directory below is the local directory to deploy
+            files = fileTree(dir: 'src/main/deploy')
+            // Deploy to RoboRIO target, into /home/lvuser/deploy
+            targets << "roborio"
+            directory = '/home/lvuser/deploy'
         }
     }
 }
